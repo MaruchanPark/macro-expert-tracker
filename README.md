@@ -13,6 +13,8 @@
 | `reports/run-NNN.md` | 실행별 읽기용 리포트 (전문가별 요약 + 자산 스코어보드) |
 | `PROCEDURE.md` | 매주 실행 절차 (예약 작업과 스킬이 따르는 기준) |
 | `scripts/query.py` | 조회 스크립트 (Python 표준 라이브러리만 사용) |
+| `data/catalog.csv` | 전문가별 장문 읽을거리 카탈로그 (책·논문·장문 글, 읽음 여부) |
+| `scripts/catalog.py` | 카탈로그 조회·추가·읽음 처리 스크립트 |
 
 ### `data/runs.csv`
 | 컬럼 | 설명 |
@@ -36,6 +38,27 @@
 | `title` | 원문 제목 |
 | `summary` | 5줄 이내 요약 (한국어) |
 | `link` | 원문 링크. 같은 링크는 다시 추가하지 않음 (중복 제거 키) |
+
+### `data/catalog.csv` (읽을거리 카탈로그)
+| 컬럼 | 설명 |
+|---|---|
+| `expert` | 전문가 이름 |
+| `tier` | `3` = 책·논문·리서치 보고서, `2` = 5분 이상 읽는 장문 글. 5분 미만 짧은 글(1등급)은 넣지 않음 |
+| `title` | 제목 |
+| `published_date` | 발행일 (YYYY-MM-DD, 모르면 YYYY-MM 또는 YYYY) |
+| `outlet` | 매체·출판사 |
+| `read` | 읽음 여부 `Y`/`N` (기본 `N`) |
+| `link` | 링크 (있으면) |
+
+전문가별로 묶어 최신순으로 정렬됩니다. 매주 트래커가 장문 글을 찾으면 함께 추가하고, 매월 1일 별도 갱신이 놓친 책·논문·장문을 보충합니다.
+초기 구축 범위: 책·논문은 전체 이력(로고프는 대표 논문 + 2021년 이후 논문), 장문 글은 2021년 이후.
+
+```bash
+python3 scripts/catalog.py stats                                 # 전문가별 건수 / 안 읽은 수
+python3 scripts/catalog.py list --expert "Lyn Alden" --unread    # 안 읽은 것만
+python3 scripts/catalog.py list --tier 3                          # 책·논문만
+python3 scripts/catalog.py mark-read "Broken Money"              # 읽음 처리
+```
 
 ## 조회 예시
 

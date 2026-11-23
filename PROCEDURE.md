@@ -13,6 +13,8 @@ Bitcoin (BTC), Ethereum (ETH), Nasdaq / US stocks (NDX), US Treasuries (UST)
 - `data/opinions.csv`: `run_no,expert,published_date,asset,stance,stance_change,title,summary,link` (append-only; one row per asset per item)
 - `reports/run-NNN.md`: readable report per run
 - `scripts/query.py`: queries (`run N`, `scoreboard N`, `expert "Name" [--nth K] [--asset A]`, `asset A [--run N]`, `last-run`)
+- `data/catalog.csv`: long-form reading catalog `expert,tier,title,published_date,outlet,read,link` (tier 3 = books/papers/research reports, tier 2 = long-form 5+ min read; tier 1 short items are never added; `read` defaults to `N`)
+- `scripts/catalog.py`: catalog tool (`list [--expert] [--tier] [--unread]`, `add rows.csv` with dedupe, `mark-read "text"`, `stats`)
 
 ## Weekly run procedure
 1. Clone or pull the repo and check out `main`.
@@ -22,11 +24,23 @@ Bitcoin (BTC), Ethereum (ETH), Nasdaq / US stocks (NDX), US Treasuries (UST)
 5. Keep only items whose publication date falls inside the period and that state a view on a target asset. Open every source to confirm date and content; never record a link you did not open. Skip links already in `opinions.csv`.
 6. For each item: stance per asset (Bull / Bear / Neutral) only where the source supports it; summary in Korean, at most 5 lines, covering the core claim, reasoning and key numbers; distinguish the expert's words from the article's framing. `stance_change=Y` when the stance differs from the roster's expected stance for that asset (treat roster `Mixed` as matching `Neutral`; roster `-` means no change flag), otherwise `N`.
 7. Append rows to `data/opinions.csv` with Python's `csv` module (proper quoting), append the run row to `data/runs.csv` (`status=success`, `items` = number of distinct links added, short notes), and write `reports/run-NNN.md` (three-digit number) with per-expert entries, an asset scoreboard (Bull/Bear/Neutral counts, stance changes), experts with no new opinion, and notable items just outside the period. `python3 scripts/query.py scoreboard N` produces the scoreboard numbers.
+7a. Catalog: for every item collected in this run that is tier 2 (a long-form piece of roughly 1,000+ words / 5+ minutes of reading: essay, newsletter issue, research letter, long op-ed) or tier 3 (book, paper, research report), also add it to `data/catalog.csv`. Write the rows to a temp CSV with the catalog columns and run `python3 scripts/catalog.py add <file>`; it skips tier 1 and duplicates (same expert + same title, or same item link). Short items (X posts, quotes in news articles, short interviews, clips) stay out of the catalog. Also add any tier 2/3 item by a tracked expert that you came across during the run even if it states no view on a target asset. Mention the number of catalog rows added in the run notes and the reply.
 8. If the run fails partway, do not append partial opinions; append a run row with `status=failed` and the reason so the next run reuses the same `period_start`.
 9. Commit (`Run N: <period_start date> to <period_end date>`) and push to `main`. If the push is rejected, pull and retry.
 10. Reply in Korean with: run number and period, item count, the scoreboard, stance changes, and a link to the report on GitHub.
 
+## Monthly catalog update procedure
+Runs on the 1st of each month (scheduled task, morning KST). It catches long-form items the weekly run missed.
+1. Clone or pull the repo and check out `main`.
+2. Window: from the 1st of the previous month (UTC) to now. Read `data/catalog.csv` for existing rows (dedupe) and `data/roster.csv` for the experts.
+3. For each expert, check their long-form sources for new tier 2/3 items published in the window: books (new or announced releases), papers / working papers (NBER, SSRN, journals, central-bank or IMF series), research reports, and long-form pieces (5+ min read). Known sources: Hussman market comments (hussmanfunds.com/category/comment/), Hoisington quarterly reviews (hoisington.com/economic_overview.html), lynalden.com and her newsletter archive, GMO research library (Grantham), TIME / economicprinciples.org / LinkedIn long essays (Dalio), Capital Wars Substack (Howell; posts are mostly paid, keep only essays, not weekly data updates), ARK research and Big Ideas (Wood), Rogoff's Harvard page / NBER, yardeni.com books, Ex Uno Plures (Pozsar), Project Syndicate / Foreign Affairs long essays, plus web search per expert with the month and year.
+4. Open every item to confirm date, author and length; never add a link you did not open. Tier 3 = book / paper / research report; tier 2 = 5+ min read; skip anything shorter.
+5. Write new rows to a temp CSV (`expert,tier,title,published_date,outlet,read,link`, `read=N`, date as YYYY-MM-DD or as precise as known) and run `python3 scripts/catalog.py add <file>`.
+6. Commit (`Catalog update: YYYY-MM`) and push to `main`; if nothing new, commit nothing. If the push is rejected, pull and retry.
+7. Reply in Korean: number of rows added per expert, the new tier 3 items by name, and a link to `data/catalog.csv` on GitHub. Note any source that could not be reached.
+
 ## Ad-hoc requests
+- "안 읽은 책/논문": `python3 scripts/catalog.py list --tier 3 --unread` (add `--expert "Name"` to filter). "읽음 처리": `python3 scripts/catalog.py mark-read "title text"`, then commit and push.
 - "N회차 의견": `python3 scripts/query.py run N` (or read `reports/run-NNN.md`).
 - "Gromen의 최신에서 2번째 전 의견": `python3 scripts/query.py expert "Luke Gromen" --nth 2` (0 = latest, sorted by published_date).
 - A request for a different period or subset of experts that is not the weekly run: follow steps 4 to 6 and answer in chat; only write to the repo when asked.
