@@ -11,6 +11,7 @@
 | `data/runs.csv` | 실행 기록 (append-only) |
 | `data/opinions.csv` | 수집된 의견 (append-only, 한 항목이 여러 자산을 다루면 자산별로 한 행) |
 | `reports/run-NNN.md` | 실행별 읽기용 리포트 (전문가별 요약 + 자산 스코어보드) |
+| `PROCEDURE.md` | 매주 실행 절차 (예약 작업과 스킬이 따르는 기준) |
 | `scripts/query.py` | 조회 스크립트 (Python 표준 라이브러리만 사용) |
 
 ### `data/runs.csv`
