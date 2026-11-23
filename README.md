@@ -15,6 +15,18 @@
 | `scripts/query.py` | 조회 스크립트 (Python 표준 라이브러리만 사용) |
 | `data/catalog.csv` | 전문가별 장문 읽을거리 카탈로그 (책·논문·장문 글, 읽음 여부) |
 | `scripts/catalog.py` | 카탈로그 조회·추가·읽음 처리 스크립트 |
+| `briefs/YYYY-MM/YYYY-MM-DD.md` | 일일 긍정/부정 전망 브리프 (BTC·ETH·나스닥·달러 패권 + 미국 매크로 지표) |
+| `data/briefs.csv` | 일일 브리프 색인 (날짜, 자산별 분위기, 헤드라인, 파일 경로) |
+
+### 일일 브리프
+매일 아침(KST) 예약 작업이 미국 매크로 지표와 4개 자산의 긍정·부정 근거를 조사해 `briefs/YYYY-MM/YYYY-MM-DD.md`에 저장하고 `data/briefs.csv`에 한 줄을 추가합니다. 절차는 `PROCEDURE.md`의 "Daily outlook brief procedure"를 따릅니다.
+
+| 컬럼 (`data/briefs.csv`) | 설명 |
+|---|---|
+| `date` | 브리프 날짜 (KST, YYYY-MM-DD) |
+| `btc` / `eth` / `ndx` / `usd` | 그날 자산별 분위기 `Bull` / `Bear` / `Mixed` (`usd` = 달러 패권) |
+| `headline` | 한 줄 요약 (한국어) |
+| `file` | 브리프 파일 경로 |
 
 ### `data/runs.csv`
 | 컬럼 | 설명 |

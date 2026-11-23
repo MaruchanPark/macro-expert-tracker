@@ -15,6 +15,8 @@ Bitcoin (BTC), Ethereum (ETH), Nasdaq / US stocks (NDX), US Treasuries (UST)
 - `scripts/query.py`: queries (`run N`, `scoreboard N`, `expert "Name" [--nth K] [--asset A]`, `asset A [--run N]`, `last-run`)
 - `data/catalog.csv`: long-form reading catalog `expert,tier,title,published_date,outlet,read,link` (tier 3 = books/papers/research reports, tier 2 = long-form 5+ min read; tier 1 short items are never added; `read` defaults to `N`)
 - `scripts/catalog.py`: catalog tool (`list [--expert] [--tier] [--unread]`, `add rows.csv` with dedupe, `mark-read "text"`, `stats`)
+- `briefs/YYYY-MM/YYYY-MM-DD.md`: daily bull/bear outlook brief (BTC, ETH, Nasdaq, US dollar hegemony + US macro snapshot)
+- `data/briefs.csv`: `date,btc,eth,ndx,usd,headline,file` (append-only; one row per day; mood values `Bull` / `Bear` / `Mixed`)
 
 ## Weekly run procedure
 1. Clone or pull the repo and check out `main`.
@@ -39,10 +41,20 @@ Runs on the 1st of each month (scheduled task, morning KST). It catches long-for
 6. Commit (`Catalog update: YYYY-MM`) and push to `main`; if nothing new, commit nothing. If the push is rejected, pull and retry.
 7. Reply in Korean: number of rows added per expert, the new tier 3 items by name, and a link to `data/catalog.csv` on GitHub. Note any source that could not be reached.
 
+## Daily outlook brief procedure
+Runs every day in the morning KST (scheduled task). Independent of the weekly expert run.
+1. Clone or pull the repo and check out `main`. Date = today's date in KST (YYYY-MM-DD). If `data/briefs.csv` already has a row for that date, stop without writing.
+2. Research the last 24-48 hours (since Friday on Mondays) with web search, following the `daily-macro-outlook` skill when it is available: US macro snapshot (CPI/PCE, Fed decision and next FOMC with market odds, 2y/10y yields, latest jobs report, S&P 500 earnings and big-tech results, dollar index, key events this week), then for BTC, ETH, Nasdaq and dollar hegemony: price/24h move, 2-3 bull points, 2-3 bear points, today's key issue; then a synthesis with each asset's mood (Bull / Bear / Mixed) and the cross-asset link. Every figure from a source opened in this run, with its link; never from memory.
+3. Write the brief in Korean to `briefs/YYYY-MM/YYYY-MM-DD.md` with a `## 출처` link list at the end and the line `투자 조언이 아닙니다.`
+4. Append one row to `data/briefs.csv` with Python's `csv` module: date, mood per asset (`Bull`/`Bear`/`Mixed`), a one-line Korean headline, the file path.
+5. Commit (`Daily brief: YYYY-MM-DD`) and push to `main`. If the push is rejected, pull and retry.
+6. Reply in Korean with the full brief and the GitHub link to the file.
+
 ## Ad-hoc requests
 - "안 읽은 책/논문": `python3 scripts/catalog.py list --tier 3 --unread` (add `--expert "Name"` to filter). "읽음 처리": `python3 scripts/catalog.py mark-read "title text"`, then commit and push.
 - "N회차 의견": `python3 scripts/query.py run N` (or read `reports/run-NNN.md`).
 - "Gromen의 최신에서 2번째 전 의견": `python3 scripts/query.py expert "Luke Gromen" --nth 2` (0 = latest, sorted by published_date).
+- "N일 브리프" / "이번 주 분위기 변화": read `briefs/YYYY-MM/YYYY-MM-DD.md` or `data/briefs.csv`.
 - A request for a different period or subset of experts that is not the weekly run: follow steps 4 to 6 and answer in chat; only write to the repo when asked.
 
 ## Output format (Korean)
